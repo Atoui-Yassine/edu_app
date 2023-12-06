@@ -1,24 +1,45 @@
-import 'package:clean_code_architecture_tdd/features/number_trivia/presentation/pages/number_trivia_page.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'injection_container.dart' as di;
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cloudmate/src/app.dart';
+import 'package:cloudmate/src/utils/logger.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await di.init();
-  runApp(const MyApp());
+  await Firebase.initializeApp();
+  Bloc.observer = AppBlocObserver();
+  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    statusBarBrightness: Brightness.dark,
+    statusBarIconBrightness: Brightness.dark,
+  ));
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        title: 'Clean Code Architecture',
-        theme: ThemeData(
-            primaryColor: Colors.purple.shade400,
-            colorScheme:
-                ColorScheme.fromSwatch().copyWith(secondary: Colors.purple)),
-        home: NumberTriviaPage());
+    return App();
+  }
+}
+
+class AppBlocObserver extends BlocObserver {
+  @override
+  void onEvent(Bloc bloc, Object? event) {
+    UtilLogger.log('BLOC EVENT', event);
+    super.onEvent(bloc, event);
+  }
+
+  @override
+  void onError(BlocBase bloc, Object error, StackTrace stackTrace) {
+    UtilLogger.log('BLOC ERROR', error);
+    super.onError(bloc, error, stackTrace);
+  }
+
+  @override
+  void onTransition(Bloc bloc, Transition transition) {
+    UtilLogger.log('BLOC TRANSITION', transition.event);
+    super.onTransition(bloc, transition);
   }
 }
